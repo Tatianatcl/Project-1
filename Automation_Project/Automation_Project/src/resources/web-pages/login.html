@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>login</title>
+    <style>
+      body {
+        text-align: center;
+        background-image: BG1.jpeg;
+      }
+    </style>
+</head>
+<body>
+    <h1>Login Page</h1>
+  <h3>Username</h3>
+    <input type="text" id="username" placeholder="username"> 
+  <h3>Password</h3>
+    <input type="password" id="password" placeholder="password">
+    <button onclick="login()">login</button>
+</body>
+  <script>
+    async function login(){
+// attaching user information with HTTP request
+        let loginInfo = {
+        "username": document.getElementById("username").value,
+        "password": document.getElementById("password").value
+        }
+//Converting into JSON
+        let loginJSON = JSON.stringify(loginInfo);
+//HTTP request configurations
+        let config = {
+            method:"PATCH", 
+            headers:{'Content-Type':"application/json"}, 
+            body: loginJSON
+        }
+         let httpResponse = await fetch("https://bugcatcher.coe.revaturelabs.com/27/login",config);
+
+//if statement, if status is 200
+      if(httpResponse.status === 200){ 
+            let responseBody = await httpResponse.json(); 
+              
+            if(responseBody.role === "Tester"){ 
+                console.log(responseBody.username)
+                let usernameTesterPage = responseBody.username;
+                sessionStorage.setItem("username", usernameTesterPage);
+                window.location.href = "tester-page.html"
+            } else {
+                window.location.href = "manager-page.html";
+            }
+        } else {
+            let responseBody = await httpResponse.json(); 
+            alert(responseBody.detail);
+        }
+
+      }
+
+  </script>
+</html>

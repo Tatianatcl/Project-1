@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+   
+    <title>Manager Page</title>
+  
+</head>
+
+<body>
+<h1> Welcome Manager</h1>   
+
+<label>Create a Defect:</label>
+<input type="text" id="defect" placeholder="Defect Name"></label><br>
+<label>Role:</label>
+<select name="tester" id="tester">
+<option value="">Tester Username</option>
+</select>
+<button id="assignTester" onclick="createDefect()">assign</button>
+
+
+</body>
+
+<script>
+
+async function createDefect(){
+const defect = document.getElementById("defect")
+const tester = document.getElementById("tester")
+
+let httpRequestBody =   {
+    "desc": document.getElementById("defect").value,
+    "assignedTo": document.getElementById("tester").value,
+    "defectId": 0,
+    "dateReported": 0,
+    "status": "Pending",
+    "stepsToReproduce": "string",
+    "severity": "Low",
+    "priority": "Low"
+  }
+console.log(httpRequestBody)
+let createDefectJSON = JSON.stringify(httpRequestBody);
+console.log(createDefectJSON);
+console.log(httpRequestBody)
+let config = {
+    method:'POST',
+    headers:{'Content-Type':"application/json"},  // method is a reference to the kind of request you are making (the verb): GET is the defaul // some APIs will return an error message without this value included
+    body: createDefectJSON
+}  
+
+const httpResponse = await fetch("https://bugcatcher.coe.revaturelabs.com/27/defects",config);
+console.log(httpResponse.status);
+
+if(httpResponse.status == 201){ 
+    let responseBody = await httpResponse.json(); 
+      alert("submit successful"); 
+} else {
+    alert("data not submitted");
+}
+}
+
+async function setup() {
+    const button = document.getElementById("assignTester")
+   
+    let config = {
+        method:"GET", 
+        headers:{'Content-Type':"application/json"},
+    }
+    const httpResponse = await fetch("https://bugcatcher.coe.revaturelabs.com/27/employees", config); 
+    const responseBody = await httpResponse.json(); 
+    let emplSel = document.getElementById("tester");
+    for (let obj of responseBody) {
+        if (obj.role == "Tester") {
+            let option = document.createElement("option")
+            option.text = obj.username
+            emplSel.appendChild(option)
+        }
+    }
+}
+    setup()
+</script>
+                                             
+</html>

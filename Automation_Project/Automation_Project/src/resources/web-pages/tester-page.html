@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html >
+<head>
+    <title>Tester Homepage</title>
+    <h1>Welcome Tester</h1>  
+</head>
+<body onload="getDefectPending()">
+    <table id="tableDefect">
+
+
+    </table>
+     <h1>Accepted Defects</h1>
+     <table id="acceptedDefects">
+   
+   
+   </table>
+</body>
+<script>
+
+ async function getDefectPending(){
+    const tableDefect = document.getElementById("tableDefect")
+    const acceptedDefects = document.getElementById("acceptedDefects")
+
+    let usernameTesterPage = sessionStorage.getItem("username");
+    console.log(usernameTesterPage);
+   let httpResponse = await fetch("https://bugcatcher.coe.revaturelabs.com/27/defects"); console.log(httpResponse);
+   if(httpResponse.status === 200){ 
+            let responseBody = await httpResponse.json(); 
+            let result = `<tr><th> Defects </th> <th> Accept/Decline</th> <th> submit</th></tr>`
+            let acceptDefectsTable = `<tr><th> Defects </th> <th> Accept/Decline</th> <th> submit</th></tr>`
+            console.log(responseBody)
+            for(person of responseBody){
+             console.log(person)
+             if(usernameTesterPage === person.assignedTo){
+
+                result = result + 
+                `<tr> <td> ${person.desc} </td> 
+                    <td> 
+                        <option value="">select one</option>
+                        <option value="Accepted"> Accept </option>
+                        <option value="Declined"> Decline</option>
+                    </td> 
+                
+                    <td> <button onclick="acceptordecline(${person.defectId})">submit</button>
+                        </td>
+                        </tr>`
+                      tableDefect.innerHTML = result 
+                console.log(person.desc)
+             }
+             else if(usernameTesterPage === person.assignedTo && person.status==="Accepted"){
+                acceptDefectsTable = acceptDefectsTable +
+                 `<tr><td>${person.defectId}</td> <td> ${person.desc} </td> <td> <select id="${person.defect}">
+                    <option value="">select one</option>
+                    <option value="Shelved"> Shelved </option>
+                    <option value="Rejected"> Rejected</option>
+                    <option value="Fixed"> Fixed </option>
+                    </td> 
+                    <td> <button onclick="acceptordecline(${person.defectId})">submit</button></td></tr>`
+            acceptedDefects.innerHTML = acceptDefectsTable 
+             }
+        }
+    }
+
+            
+
+getDefectPending()
+
+async function acceptordecline(value){
+    let defectIdGet = document.getElementById(`${value}`)
+    console.log(defectIdGet.options[defectIdGet.selectedIndex].value)
+    let loginInfo = {
+        "status": defectIdGet.options[defectIdGet.selectedIndex].value
+        }
+
+        let loginJSON = JSON.stringify(loginInfo);
+
+    
+        let httpResponse = await fetch(`https://bugcatcher.coe.revaturelabs.com/27/defects/${value}`,config);
+        if(httpResponse.status === 204){
+            alert("updated")
+        }
+       
+}
+
+acceptordecline(value);
+</script>
+</html> 
